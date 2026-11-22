@@ -4,10 +4,10 @@
 One small box on the lab LAN that talks to devices which only offer their own Wi-Fi AP or a Bluetooth link, and re-exposes them as a web UI and HTTP API on the LAN. Adding a device means writing an adapter, not a new server.
 
 ## Hardware
-- **Raspberry Pi 3 Model B+**, hostname `golden-gate`, Pi OS Lite 64-bit, user `chris`. LAN address reserved at 10.0.0.24 (eth0).
+- **Raspberry Pi 3 Model B (Rev 1.2)**, hostname `golden-gate`, Pi OS Lite 64-bit, user `chris`. LAN address reserved at 10.0.0.24 (eth0).
 - **eth0**: lab LAN. The only interface with a default route. The UI and API are served here.
-- **wlan0**: onboard Wi-Fi (CYW43455, 2.4/5 GHz). **Not on the home Wi-Fi.** Dedicated to joining device APs (for example `INSTAX-xxxx`). **No default route**: device networks are isolated and never bridged to the LAN.
-- **hci0**: onboard Bluetooth (CYW43455, BT 4.2 / BLE), driven by BlueZ over D-Bus.
+- **wlan0**: onboard Wi-Fi (BCM43438, 2.4 GHz only; fine for the Instax AP). **Not on the home Wi-Fi.** Dedicated to joining device APs (for example `INSTAX-xxxx`). **No default route**: device networks are isolated and never bridged to the LAN.
+- **hci0**: onboard Bluetooth (BCM43438, BT 4.1 / BLE), driven by BlueZ over D-Bus.
 - No USB Wi-Fi dongle. If two Wi-Fi devices ever need to be connected at once, add a second radio then.
 
 ## Software layout
