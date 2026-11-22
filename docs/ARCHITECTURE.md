@@ -4,11 +4,11 @@
 One small box on the lab LAN that talks to devices which only offer their own Wi-Fi AP or a Bluetooth link, and re-exposes them as a web UI and HTTP API on the LAN. Adding a device means writing an adapter, not a new server.
 
 ## Hardware
-- **Raspberry Pi 3**, hostname `golden-gate`, Pi OS Lite 64-bit, user `chris`.
+- **Raspberry Pi 3 Model B+**, hostname `golden-gate`, Pi OS Lite 64-bit, user `chris`. LAN address reserved at 10.0.0.24 (eth0).
 - **eth0**: lab LAN. The only interface with a default route. The UI and API are served here.
-- **wlan1**: TP-Link Archer TX10UB Nano (RTL8851BU, `rtw89`; DKMS on kernels < 6.17). Joins device APs (for example `INSTAX-xxxx`). **No default route**: device networks are isolated and never bridged to the LAN.
-- **wlan0**: onboard Wi-Fi. Spare. Can serve as a second device-AP radio later.
-- **hci0**: onboard Bluetooth (BCM43438, BT 4.1 / BLE), driven by BlueZ over D-Bus.
+- **wlan0**: onboard Wi-Fi (CYW43455, 2.4/5 GHz). **Not on the home Wi-Fi.** Dedicated to joining device APs (for example `INSTAX-xxxx`). **No default route**: device networks are isolated and never bridged to the LAN.
+- **hci0**: onboard Bluetooth (CYW43455, BT 4.2 / BLE), driven by BlueZ over D-Bus.
+- No USB Wi-Fi dongle. If two Wi-Fi devices ever need to be connected at once, add a second radio then.
 
 ## Software layout
 ```
@@ -17,7 +17,7 @@ golden-gate/
   adapters/
     instax_sp2/   # adapter #1 + its mock device
   links/
-    wifi_ap.py    # join/leave a device AP on wlan1 (NetworkManager), no default route
+    wifi_ap.py    # join/leave a device AP on wlan0 (NetworkManager), no default route
     ble.py        # BlueZ scan/connect/GATT helpers
   ui/          # web UI: device list + per-device panels
   deploy/      # Pi setup script, systemd units, env template
@@ -26,7 +26,7 @@ golden-gate/
 ### Core
 - **Registry**: loads the enabled adapters from config (`/etc/golden-gate/devices.toml`) and holds each device's state (`offline | connecting | ready | busy | error`).
 - **Job queue**: one job at a time per device. A job is an adapter action call with its inputs.
-- **Link arbitration**: `wlan1` can join only one AP at a time. Core serialises Wi-Fi-AP devices on that radio and reconnects on drop.
+- **Link arbitration**: `wlan0` can join only one AP at a time. Core serialises Wi-Fi-AP devices on that radio and reconnects on drop.
 - **HTTP API** (LAN only):
   - `GET /api/devices` lists devices with state and their declared actions.
   - `GET /api/devices/{id}` returns status (adapter-specific fields, e.g. battery, prints left).
@@ -61,7 +61,7 @@ A device list. Each device's panel is generated from its status fields and actio
 
 ## Security
 - LAN only, no internet exposure, no auth in v1 (same trust model as other lab services). Revisit before adding any device that can actuate hardware.
-- Device networks are never routed. `wlan1` and Bluetooth carry device traffic only.
+- Device networks are never routed. `wlan0` and Bluetooth carry device traffic only.
 - Agents develop against mocks. **Richard** deploys to the Pi from onyx-ops (agents can't reach the LAN).
 
 ## Human gates
