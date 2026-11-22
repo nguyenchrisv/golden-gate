@@ -4,7 +4,7 @@
 One small box on the lab LAN that talks to devices which only offer their own Wi-Fi AP or a Bluetooth link, and re-exposes them as a web UI and HTTP API on the LAN. Adding a device means writing an adapter, not a new server.
 
 ## Hardware
-- **Raspberry Pi 3**, hostname `instax-bridge`, Pi OS Lite 64-bit, user `chris`.
+- **Raspberry Pi 3**, hostname `golden-gate`, Pi OS Lite 64-bit, user `chris`.
 - **eth0**: lab LAN. The only interface with a default route. The UI and API are served here.
 - **wlan1**: TP-Link Archer TX10UB Nano (RTL8851BU, `rtw89`; DKMS on kernels < 6.17). Joins device APs (for example `INSTAX-xxxx`). **No default route**: device networks are isolated and never bridged to the LAN.
 - **wlan0**: onboard Wi-Fi. Spare. Can serve as a second device-AP radio later.
