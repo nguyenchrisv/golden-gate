@@ -13,15 +13,20 @@ One small box on the lab LAN that talks to devices which only offer their own Wi
 ## Software layout
 ```
 golden-gate/
-  core/        # service: device registry, job queue, HTTP API, web UI host
-  adapters/
-    instax_sp2/   # adapter #1 + its mock device
-  links/
-    wifi_ap.py    # join/leave a device AP on wlan0 (NetworkManager), no default route
-    ble.py        # BlueZ scan/connect/GATT helpers
-  ui/          # web UI: device list + per-device panels
-  deploy/      # Pi setup script, systemd units, env template
+  golden_gate/
+    core/
+      adapter.py    # the adapter contract (Adapter, ActionSpec, InputSpec, DeviceState)
+      ...           # registry, job queue, link arbitration, HTTP API (aiohttp), web UI host
+    adapters/
+      instax_sp2/   # adapter #1 + its mock device
+    links/
+      wifi_ap.py    # join/leave a device AP on wlan0 (NetworkManager), no default route
+      ble.py        # BlueZ scan/connect/GATT helpers
+    ui/             # web UI static files: device list + per-device panels
+  tests/            # pytest, mocks only, fixtures in tests/fixtures/
+  deploy/           # Pi setup script, systemd units, env template
 ```
+Python 3.13, asyncio. Dependencies: aiohttp, pillow, bleak (BLE extra); dev: pytest, pytest-asyncio.
 
 ### Core
 - **Registry**: loads the enabled adapters from config (`/etc/golden-gate/devices.toml`) and holds each device's state (`offline | connecting | ready | busy | error`).
@@ -36,7 +41,7 @@ golden-gate/
 - **Secrets** (device PINs, pairing keys) live in `/etc/golden-gate/secrets.env` (root:chris 0640), never in source or the repo.
 
 ### Adapter interface
-Each adapter is a Python package exposing one class:
+Each adapter is a Python package exposing one subclass of `golden_gate.core.adapter.Adapter` (the code is the source of truth):
 ```python
 class Adapter:
     kind: str                   # "instax_sp2"
